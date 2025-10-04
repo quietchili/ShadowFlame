@@ -32,14 +32,16 @@ class Player {
     update() {
         this.is_on_ground = false;
 
-        if (
-            this.y + this.height + this.dy >= floor.y &&
-            this.x + this.width > floor.x &&
-            this.x < floor.x + floor.width
-        ) {
-            this.y = floor.y - this.height;
-            this.is_on_ground = true;
-        }
+        floor_tiles.forEach(floor =>{
+            if (
+                this.y + this.height + this.dy >= floor.y &&
+                this.x + this.width > floor.x &&
+                this.x < floor.x + floor.width
+            ) {
+                this.y = floor.y - this.height;
+                this.is_on_ground = true;
+            }
+        })
 
         if (!this.is_on_ground) {
             this.dy += 0.02;
@@ -63,14 +65,10 @@ class Player {
         this.y += this.dy;
         this.x += this.dx;
 
-        if (this.x < 0) {
-            this.x = 0;
-            this.dx = 0;
-        }
-        if (this.x + this.width > world_width) {
-            this.x = world_width - this.width;
-            this.dx = 0;
-        }
+        // if (this.x + this.width > world_width) {
+        //     this.x = world_width - this.width;
+        //     this.dx = 0;
+        // }
 
         if (this.is_on_ground && this.input.up && this.dy < this.max_speed) {
             this.dy -= this.jump_height;

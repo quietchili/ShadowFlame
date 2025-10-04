@@ -1,61 +1,72 @@
 
-class Enemy {
+class Boss {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.width = TILE_SIZE;
-        this.height = TILE_SIZE;
+        this.width = TILE_SIZE*5;
+        this.height = TILE_SIZE*5;
         this.alive = true;
         this.is_counted = false;
+        this.dx = 1;
         this.dy = 0;
         this.is_on_ground = true;
-        this.speed = 0.1;
+        this.speed = 0.2;
         this.jump_height = 0.8;
         this.fireballs = [];
-        this.fire_cooldown = 0;
-
+        this.fire_cooldown = 30;
+        this.health = 20;
         this.facing = 'left';
         this.frame_index = 0;
         this.frame_timer = 0;
         this.frame_interval = 12;
         this.frame_index_y = 0;
+
+        this.max_speed = 0.01;
     }
     update() {
         if (!this.alive) return;
 
-        this.is_on_ground = false;
 
+        //fireball
+        if (this.fire_cooldown > 0) this.fire_cooldown--;
+
+        if (this.fire_cooldown === 0) {
+            let fireball_speed_x = 0;
+            if (this.dx == 1) {
+                if (this.facing === 'left') {
+                    fireball_speed_x -= this.max_speed * 2;
+                } else {
+                    fireball_speed_x = this.max_speed * 2;
+                }
+            } else {
+                fireball_speed_x = this.dx * 2;
+            }
+
+            const fireSound = new Audio('fire.mp3');
+            fireSound.volume = 0.5;
+            fireSound.play();
+
+            let new_fireball = new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, fireball_speed_x, 0);
+            this.fireballs.push(new_fireball);
+            this.fire_cooldown = 100;
+        }
+
+        //movement
         if (player.x < this.x) {
-            this.x -= this.speed;
+            // this.x -= this.speed;
+            this.dx -= this.max_speed;
             this.facing = 'left';
             this.frame_index_y = TILE_SIZE;
         } else if (player.x > this.x) {
-            this.x += this.speed;
+            // this.x += this.speed;
+            this.dx += this.max_speed;
             this.facing = 'right';
             this.frame_index_y = TILE_SIZE;
         } else {
             this.frame_index_y = 0;
         }
 
-        enemies.forEach(other_enemy => {
-            if (other_enemy !== this && other_enemy.alive) {
-                if (
-                    Math.abs(this.x - other_enemy.x) < this.width &&
-                    Math.abs(this.y - other_enemy.y) < this.height
-                ) {
-                    if (this.x < other_enemy.x) {
-                        this.x -= 0.1;
-                        other_enemy.x += 0.1;
-                    } else {
-                        this.x += 0.1;
-                        other_enemy.x -= 0.1;
-                    }
-                }
-            }
-        });
-
-        //if (this.x < 0) this.x = 0;
-        //if (this.x + this.width > world_width) this.x = world_width - this.width;
+        this.is_on_ground = false;
 
         if (!this.is_on_ground) {
             this.dy += 0.02;
@@ -70,9 +81,7 @@ class Enemy {
                 this.is_on_ground = true;
             }
         })
-
         
-
         platforms.forEach(p => {
             if (
                 this.y + this.height + this.dy >= p.y &&
@@ -99,9 +108,19 @@ class Enemy {
                 this.frame_index = 0;
             }
         }
+
+        this.fireballs.forEach(fireball => {
+            fireball.update();
+        });
+
+        this.y += this.dy;
+        this.x += this.dx;
     }
     draw() {
         if (!this.alive) return;
+        this.fireballs.forEach(fireball => {
+            fireball.draw();
+        });
 
         ctx.save();
         if (this.facing === 'left') {

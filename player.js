@@ -46,7 +46,7 @@ class Player {
         })
 
         if (!this.is_on_ground) {
-            this.dy += 0.002;
+            this.dy += 0.015;
         } else {
             this.dy = 0;
         }
@@ -138,24 +138,20 @@ class Player {
         this.fireballs.forEach(fireball => {
             fireball.draw();
         });
-
-        ctx.save();
-        ctx.translate(0,0);
-        ctx.rotate(45*Math.PI/180);
-        ctx.translate(-camera_x, -camera_y);
-
-        ctx.drawImage(
-            tile_map,
-            this.parachute_frame_index_x * TILE_SIZE,
-            this.parachute_frame_index_y,
-            TILE_SIZE,
-            TILE_SIZE,
-            this.x-4,
-            this.y-TILE_SIZE+5,
-            this.width,
-            this.height
-        );
-        ctx.restore();
+                
+        if(this.is_on_ground == false){
+            ctx.drawImage(
+                tile_map,
+                this.parachute_frame_index_x * TILE_SIZE,
+                this.parachute_frame_index_y,
+                TILE_SIZE,
+                TILE_SIZE,
+                this.x-4,
+                this.y-TILE_SIZE+5,
+                this.width,
+                this.height
+            );
+        }
 
         ctx.save();
         if (this.facing === 'left') {

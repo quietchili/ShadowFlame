@@ -42,9 +42,9 @@ class Boss {
                 fireball_speed_x = this.dx * 2;
             }
 
-            const fireSound = new Audio('fire.mp3');
-            fireSound.volume = 0.5;
-            fireSound.play();
+            // const fireSound = new Audio('fire.mp3');
+            // fireSound.volume = 0.5;
+            // fireSound.play();
 
             let new_fireball = new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, fireball_speed_x, 0);
             this.fireballs.push(new_fireball);

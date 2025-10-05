@@ -12,11 +12,12 @@ document.getElementById("music").volume = 0.1;
 
 const tilemap_image = new Image();
 const WORLD_TILEMAP_SRC = "world_tiles.png"
+const IMAGE_SOURCE = "cats.png"
 const TILE_SIZE = 8;
-const SCALE = 3;
+let SCALE = 3
 const PLAYER_MAX_SPEED = 0.4;
 const PLAYER_JUMP_HEIGHT = 1.1;
-const IMAGE_SOURCE = "spritesheet.png";
+//const IMAGE_SOURCE = "spritesheet.png";
 const canvas = document.getElementById('my_canvas');
 const ctx = canvas.getContext('2d');
 const keys = {
@@ -432,5 +433,18 @@ document.addEventListener('keyup', (event) => {
         player.input[dir] = false;
     }
 });
+
+document.addEventListener("wheel", (event) => {
+    if(SCALE >= 0){
+        SCALE += event.deltaY * -0.001;
+    }else{
+        SCALE = 0
+    }
+    
+    console.log(SCALE);
+
+    resize();
+    
+})
 
 start();

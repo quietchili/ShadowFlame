@@ -32,18 +32,26 @@ class Fireball {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, 2 * TILE_SIZE,
-                TILE_SIZE, TILE_SIZE,
-                -this.x - this.width, this.y,
-                this.width, this.height
+                this.frame_index * TILE_SIZE,
+                4 * TILE_SIZE,
+                TILE_SIZE,
+                TILE_SIZE,
+                -this.x - this.width,
+                this.y,
+                this.width,
+                this.height
             );
         } else {
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, 2 * TILE_SIZE,
-                TILE_SIZE, TILE_SIZE,
-                this.x, this.y,
-                this.width, this.height
+                this.frame_index * TILE_SIZE,
+                4 * TILE_SIZE,
+                TILE_SIZE,
+                TILE_SIZE,
+                this.x,
+                this.y,
+                this.width,
+                this.height
             );
         }
         ctx.restore();

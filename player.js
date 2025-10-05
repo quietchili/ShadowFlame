@@ -28,6 +28,8 @@ class Player {
         this.fireballs = [];
         this.fire_cooldown = 0;
         this.can_fire = false;
+        this.parachute_frame_index_x = 4;
+        this.parachute_frame_index_y = 0;
     }
     update() {
         this.is_on_ground = false;
@@ -44,7 +46,7 @@ class Player {
         })
 
         if (!this.is_on_ground) {
-            this.dy += 0.02;
+            this.dy += 0.002;
         } else {
             this.dy = 0;
         }
@@ -80,6 +82,12 @@ class Player {
             this.current_animation = 'walking';
             this.frame_index_y = TILE_SIZE;
         }
+        if (this.input.right && this.dx < this.max_speed) {
+            this.dx += this.max_speed;
+            this.facing = 'right';
+            this.current_animation = 'walking';
+            this.frame_index_y = TILE_SIZE;
+        }
         if (!this.input.left && !this.input.right) {
             this.dx = 0;
             this.current_animation = 'idle';
@@ -110,12 +118,7 @@ class Player {
             this.fire_cooldown = 30;
         }
 
-        if (this.input.right && this.dx < this.max_speed) {
-            this.dx += this.max_speed;
-            this.facing = 'right';
-            this.current_animation = 'walking';
-            this.frame_index_y = TILE_SIZE;
-        }
+        
 
         this.frame_timer++;
         if (this.frame_timer >= this.frame_interval) {
@@ -137,22 +140,48 @@ class Player {
         });
 
         ctx.save();
+        ctx.translate(0,0);
+        ctx.rotate(45*Math.PI/180);
+        ctx.translate(-camera_x, -camera_y);
+
+        ctx.drawImage(
+            tile_map,
+            this.parachute_frame_index_x * TILE_SIZE,
+            this.parachute_frame_index_y,
+            TILE_SIZE,
+            TILE_SIZE,
+            this.x-4,
+            this.y-TILE_SIZE+5,
+            this.width,
+            this.height
+        );
+        ctx.restore();
+
+        ctx.save();
         if (this.facing === 'left') {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, this.frame_index_y,
-                TILE_SIZE, TILE_SIZE,
-                -this.x - this.width, this.y,
-                this.width, this.height
+                this.frame_index * TILE_SIZE,
+                this.frame_index_y,
+                TILE_SIZE,
+                TILE_SIZE,
+                -this.x - this.width,
+                this.y,
+                this.width,
+                this.height
             );
         } else {
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, this.frame_index_y,
-                TILE_SIZE, TILE_SIZE,
-                this.x, this.y,
-                this.width, this.height
+                this.frame_index * TILE_SIZE,
+                this.frame_index_y,
+                TILE_SIZE,
+                TILE_SIZE,
+                this.x,
+                this.y,
+                this.width,
+                this.height
             );
         }
 

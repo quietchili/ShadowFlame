@@ -54,10 +54,14 @@ class PowerUp {
 
         ctx.drawImage(
             tile_map,
-            this.frame_index * TILE_SIZE, 2 * TILE_SIZE,
-            TILE_SIZE, TILE_SIZE,
-            this.x, this.y + this.y_offset,
-            this.width, this.height
+            this.frame_index * TILE_SIZE,
+            4 * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE,
+            this.x,
+            this.y + this.y_offset,
+            this.width,
+            this.height
         );
     }
 }

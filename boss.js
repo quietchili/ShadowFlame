@@ -7,7 +7,7 @@ class Boss {
         this.height = TILE_SIZE*5;
         this.alive = true;
         this.is_counted = false;
-        this.dx = 1;
+        this.dx = 0;
         this.dy = 0;
         this.is_on_ground = true;
         this.speed = 0.2;
@@ -21,7 +21,7 @@ class Boss {
         this.frame_interval = 12;
         this.frame_index_y = 0;
 
-        this.max_speed = 0.01;
+        this.max_speed = 0.4;
     }
     update() {
         if (!this.alive) return;
@@ -32,8 +32,8 @@ class Boss {
 
         if (this.fire_cooldown === 0) {
             let fireball_speed_x = 0;
-            if (this.dx == 1) {
-                if (this.facing === 'left') {
+            if (this.dx == 1){
+                if (this.facing === 'left'){
                     fireball_speed_x -= this.max_speed * 2;
                 } else {
                     fireball_speed_x = this.max_speed * 2;
@@ -52,12 +52,12 @@ class Boss {
         }
 
         //movement
-        if (player.x < this.x) {
+        if (player.x < this.x && this.dx > -this.max_speed) {
             // this.x -= this.speed;
             this.dx -= this.max_speed;
             this.facing = 'left';
             this.frame_index_y = TILE_SIZE;
-        } else if (player.x > this.x) {
+        } else if (player.x > this.x && this.dx < this.max_speed) {
             // this.x += this.speed;
             this.dx += this.max_speed;
             this.facing = 'right';
@@ -127,16 +127,20 @@ class Boss {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, this.frame_index_y,
+                this.frame_index * TILE_SIZE,
+                this.frame_index_y,
                 TILE_SIZE, TILE_SIZE,
-                -this.x - this.width, this.y,
+                -this.x - this.width,
+                this.y,
                 this.width, this.height
             );
         } else {
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, this.frame_index_y,
-                TILE_SIZE, TILE_SIZE,
+                this.frame_index * TILE_SIZE,
+                this.frame_index_y,
+                TILE_SIZE,
+                TILE_SIZE,
                 this.x, this.y,
                 this.width, this.height
             );

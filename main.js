@@ -497,7 +497,7 @@ document.addEventListener("wheel", (event) => {
         SCALE = 0
     }
     
-    console.log(SCALE);
+    //console.log(SCALE);
 
     resize();
     
@@ -509,7 +509,7 @@ document.addEventListener("touchstart", (event) => {
         x:event.touches[0].clientX - tilemap_rect.left,
         y:event.touches[0].clientY - tilemap_rect.top,
     }
-    console.log(event);
+    //console.log(event);
 })
 
 document.addEventListener("touchmove", (event) => {
@@ -561,7 +561,7 @@ document.addEventListener("mousedown", (event) => {
         x:event.clientX - tilemap_rect.left,
         y:event.clientY - tilemap_rect.top,
     }
-    console.log(event);
+    //console.log(event);
 })
 
 document.addEventListener("mousemove", (event) => {
@@ -588,11 +588,7 @@ document.addEventListener("mousemove", (event) => {
             player.input['up'] = false;
         }
     }
-
-    if(touch){
-
-    }
-    console.log(event);        
+    //console.log(event);        
 })
 
 document.addEventListener("mouseup", (event) => {

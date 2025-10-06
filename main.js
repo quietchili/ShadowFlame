@@ -44,7 +44,7 @@ let camera_y = 0;
 
 let floor;
 
-let boss;
+let boss = "";
 
 let floor_tiles = [];
 let enemies = [];
@@ -57,6 +57,19 @@ let enemies_remaining = 0;
 
 let has_collected_power_up = false;
 
+let boss_starting_x;
+let boss_starting_y;
+
+let touchstart = {
+    x: 0,
+    y: 0
+}
+
+let touchmove = {
+    x: 0,
+    y: 0
+}
+
 
 function update() {
     if (!player.alive) {
@@ -65,7 +78,9 @@ function update() {
 
     player.update();
 
-    boss.update();
+    if(boss){
+        boss.update();
+    }
 
     enemies.forEach(e => e.update());
 
@@ -84,8 +99,11 @@ function update() {
                 fb.y < e.y + e.height &&
                 fb.y + fb.height > e.y
             ) {
-                enemies_remaining--;
-                e.alive = false;
+                e.health--;
+                if(e.health<1){
+                    enemies_remaining--;
+                    e.alive = false;
+                }
                 
                 const impactSound = new Audio('impact.mp3');
                 impactSound.volume = 0.5;
@@ -95,6 +113,7 @@ function update() {
         });
 
         if (
+            boss &&
             boss.alive &&
             fb.x < boss.x + boss.width &&
             fb.x + fb.width > boss.x &&
@@ -107,7 +126,6 @@ function update() {
             boss.health--;
             if(boss.health<1){
                 boss.alive = false;
-                enemies_remaining--;
             }
             
             const impactSound = new Audio('impact.mp3');
@@ -139,6 +157,29 @@ function update() {
         }
     });
 
+    if(boss){
+        boss.fireballs.forEach((fb, index) => {
+            if (
+                player.alive &&
+                fb.x < player.x + player.width &&
+                fb.x + fb.width > player.x &&
+                fb.y < player.y + player.height &&
+                fb.y + fb.height > player.y
+            ) {
+                player.health--;
+                
+                const impactSound = new Audio('impact.mp3');
+                impactSound.volume = 0.5;
+                impactSound.play();
+                boss.fireballs.splice(index, 1);
+            }
+
+            if (fb.life_span < 0) {
+                boss.fireballs.splice(index, 1);
+            }
+        });
+    }    
+
     if (
         boss.alive &&
         player.x < boss.x + boss.width &&
@@ -162,6 +203,15 @@ function update() {
 
     camera_x = player.x - scaled_canvas_width / 2 + player.width / 2;
     camera_y = player.y - scaled_canvas_height / 2 + player.height / 2;
+    if(boss == "" && enemies_remaining == 0){
+        boss = new Boss(boss_starting_x, boss_starting_y);
+        //boss = new Boss(TILE_SIZE*i, TILE_SIZE*j)
+    }
+
+
+    if ((touchstart.x > 0 && touchstart.y > 0)  && player.can_fire && player.fire_cooldown === 0) {
+        player.fire();
+    }
 
     // if (camera_x < 0) camera_x = 0;
     // if (camera_x + scaled_canvas_width > world_width) camera_x = world_width - scaled_canvas_width;
@@ -205,7 +255,10 @@ function draw() {
 
     player.draw();
 
-    boss.draw();
+    if(boss){
+        boss.draw();
+    }    
+    
     platforms.forEach(p => p.draw());
 
     draw_spawn_points();
@@ -217,6 +270,14 @@ function draw() {
     ctx.restore();
 
     draw_ui();
+
+    ctx.beginPath();
+    ctx.arc(touchstart.x/SCALE,touchstart.y/SCALE, 10, 0, 2* Math.PI);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(touchmove.x/SCALE,touchmove.y/SCALE, 10, 0, 2* Math.PI);
+    ctx.stroke();
 }
 
 function draw_spawn_points() {
@@ -246,17 +307,28 @@ function draw_ui() {
         ctx.fillRect(23 + i * 8, 13, 5, 5);
     }
 
-    if (enemies_remaining === 0) {
+    ctx.font = "4px Arial";
+    ctx.textAlign = "start";
+    ctx.fillStyle = "white";
+    ctx.fillText("Health: " + player.health, scaled_canvas_width/2, scaled_canvas_height/2);
+
+    
+
+    if (enemies_remaining === 0 && boss.alive == false) {
         ctx.fillStyle = "white";
-        ctx.font = "8px Arial";
+        ctx.font = "16px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("You Win!", 50, 10);
+        ctx.fillText("You Win!", scaled_canvas_width/2, scaled_canvas_height/2-50);
+        ctx.font = "16px Arial";
+        ctx.fillText("Reset?", scaled_canvas_width/2, scaled_canvas_height/2+30);
     } else if (player.health <= 0) {
-        ctx.fillStyle = "white";
-        ctx.font = "8px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Game Over", 50, 10);
-    }
+        ctx.fillStyle = "red";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";        
+        ctx.fillText("Game Over", scaled_canvas_width/2, scaled_canvas_height/2-50);
+        ctx.font = "16px Arial";
+        ctx.fillText("Reset?", scaled_canvas_width/2, scaled_canvas_height/2+30);
+    }    
 }
 
 function start_enemy_spawning() {
@@ -291,22 +363,6 @@ function start() {
     
 
     const original_spawn_points = []
-
-    // const original_spawn_points = [
-    //     {x: 50, y: floor.y - TILE_SIZE},
-    //     {x: 100, y: floor.y - TILE_SIZE},
-    //     {x: 200, y: floor.y - TILE_SIZE},
-    //     // {x: platforms[6].x + TILE_SIZE, y: platforms[6].y - TILE_SIZE},
-    //     // {x: platforms[8].x + TILE_SIZE, y: platforms[8].y - TILE_SIZE},
-    //     // {x: platforms[0].x + TILE_SIZE, y: platforms[0].y - TILE_SIZE},
-    //     // {x: platforms[1].x + TILE_SIZE, y: platforms[1].y - TILE_SIZE},
-    //     // {x: platforms[4].x + TILE_SIZE, y: platforms[4].y - TILE_SIZE},
-    //     // {x: platforms[5].x + TILE_SIZE, y: platforms[5].y - TILE_SIZE},
-    // ];
-
-    
-
-    
 
     let tmp_imgs_url_array = [
         IMAGE_SOURCE,
@@ -393,10 +449,10 @@ function start() {
 
                 if(world_data[i][j].tile_name == "boss"){
 
-                    //enemies.push(new Enemy(TILE_SIZE*i, TILE_SIZE*j));
-
-                    boss = new Boss(TILE_SIZE*i, TILE_SIZE*j)
-                }                
+                    //enemies.push(new Enemy(TILE_SIZE*i, TILE_SIZE*j));                    
+                    boss_starting_x = TILE_SIZE*i;
+                    boss_starting_y = TILE_SIZE*j;
+                }
 
                 spawn_points = original_spawn_points.concat(original_spawn_points, original_spawn_points);
 
@@ -445,6 +501,112 @@ document.addEventListener("wheel", (event) => {
 
     resize();
     
+})
+
+document.addEventListener("touchstart", (event) => {
+    const tilemap_rect = canvas.getBoundingClientRect();
+    touchstart = {
+        x:event.touches[0].clientX - tilemap_rect.left,
+        y:event.touches[0].clientY - tilemap_rect.top,
+    }
+    console.log(event);
+})
+
+document.addEventListener("touchmove", (event) => {
+    const tilemap_rect = canvas.getBoundingClientRect();
+    touchmove = {
+        x:event.touches[0].clientX - tilemap_rect.left,
+        y:event.touches[0].clientY - tilemap_rect.top,
+    }        
+
+    if(touchmove.x < touchstart.x){
+        player.input['left'] = true;
+        player.input['right'] = false;
+    }
+    if(touchmove.x > touchstart.x){
+        player.input['right'] = true;
+        player.input['left'] = false;
+    }
+    if(touchmove.y < touchstart.y){
+        player.input['up'] = true;
+    }
+    if(touchmove.y > touchstart.y){
+        player.input['up'] = false;
+    }
+
+    if(touch){
+
+    }
+    console.log(event);        
+})
+
+document.addEventListener("touchend", (event) => {
+    touchstart = {
+        x:0,
+        y:0,
+    }
+    touchmove = {
+        x:0,
+        y:0,
+    }
+    player.input['up'] = false;
+    player.input['left'] = false;
+    player.input['right'] = false;
+})
+
+
+document.addEventListener("mousedown", (event) => {
+    const tilemap_rect = canvas.getBoundingClientRect();
+    touchstart = {
+        x:event.clientX - tilemap_rect.left,
+        y:event.clientY - tilemap_rect.top,
+    }
+    console.log(event);
+})
+
+document.addEventListener("mousemove", (event) => {
+    const tilemap_rect = canvas.getBoundingClientRect();
+    touchmove = {
+        x:event.clientX - tilemap_rect.left,
+        y:event.clientY - tilemap_rect.top,
+    }        
+
+    if(touchstart.x > 0 && touchstart.y > 0){
+
+        if(touchmove.x < touchstart.x){
+            player.input['left'] = true;
+            player.input['right'] = false;
+        }
+        if(touchmove.x > touchstart.x){
+            player.input['right'] = true;
+            player.input['left'] = false;
+        }
+        if(touchmove.y < touchstart.y){
+            player.input['up'] = true;
+        }
+        if(touchmove.y > touchstart.y){
+            player.input['up'] = false;
+        }
+    }
+
+    if(touch){
+
+    }
+    console.log(event);        
+})
+
+document.addEventListener("mouseup", (event) => {
+    touchstart = {
+        x:0,
+        y:0,
+    }
+    touchmove = {
+        x:0,
+        y:0,
+    }
+    player.input['up'] = false;
+    player.input['left'] = false;
+    player.input['right'] = false;
 })
 
 start();

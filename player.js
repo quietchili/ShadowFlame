@@ -30,6 +30,28 @@ class Player {
         this.can_fire = false;
         this.parachute_frame_index_x = 4;
         this.parachute_frame_index_y = 0;
+        this.fall_speed = 0.015;
+    }
+    fire(){
+        this.firing = true;
+        let fireball_speed_x = 0;
+        if (this.dx == 0) {
+            if (this.facing === 'left') {
+                fireball_speed_x -= this.max_speed * 2;
+            } else {
+                fireball_speed_x = this.max_speed * 2;
+            }
+        } else {
+            fireball_speed_x = this.dx * 2;
+        }
+
+        const fireSound = new Audio('fire.mp3');
+        fireSound.volume = 0.5;
+        fireSound.play();
+
+        let new_fireball = new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, fireball_speed_x, 0);
+        this.fireballs.push(new_fireball);
+        this.fire_cooldown = 30;
     }
     update() {
         this.is_on_ground = false;
@@ -46,7 +68,7 @@ class Player {
         })
 
         if (!this.is_on_ground) {
-            this.dy += 0.015;
+            this.dy += this.fall_speed;
         } else {
             this.dy = 0;
         }
@@ -72,6 +94,11 @@ class Player {
         //     this.dx = 0;
         // }
 
+        if (this.input.up) {
+            this.fall_speed = 0.001;
+        }else{
+            this.fall_speed = 0.03;
+        }
         if (this.is_on_ground && this.input.up && this.dy < this.max_speed) {
             this.dy -= this.jump_height;
             this.is_on_ground = false;
@@ -97,25 +124,7 @@ class Player {
         if (this.fire_cooldown > 0) this.fire_cooldown--;
 
         if (this.can_fire && this.input.space && this.fire_cooldown === 0) {
-            this.firing = true;
-            let fireball_speed_x = 0;
-            if (this.dx == 0) {
-                if (this.facing === 'left') {
-                    fireball_speed_x -= this.max_speed * 2;
-                } else {
-                    fireball_speed_x = this.max_speed * 2;
-                }
-            } else {
-                fireball_speed_x = this.dx * 2;
-            }
-
-            const fireSound = new Audio('fire.mp3');
-            fireSound.volume = 0.5;
-            fireSound.play();
-
-            let new_fireball = new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, fireball_speed_x, 0);
-            this.fireballs.push(new_fireball);
-            this.fire_cooldown = 30;
+            this.fire();
         }
 
         
@@ -138,19 +147,33 @@ class Player {
         this.fireballs.forEach(fireball => {
             fireball.draw();
         });
-                
-        if(this.is_on_ground == false){
+        
+        if (this.is_on_ground == false && this.input.up == true) {
+            ctx.save();
+
+            // Move the origin to the parachute’s center
+            const parachuteX = this.x;
+            const parachuteY = this.y - TILE_SIZE + 5;
+            const centerX = parachuteX + this.width / 2;
+            const centerY = parachuteY + this.height / 2;
+
+            ctx.translate(centerX, centerY);
+            ctx.rotate(45 * Math.PI / 180); // rotate 45 degrees
+
+            // Draw parachute relative to the new origin
             ctx.drawImage(
                 tile_map,
                 this.parachute_frame_index_x * TILE_SIZE,
                 this.parachute_frame_index_y,
                 TILE_SIZE,
                 TILE_SIZE,
-                this.x-4,
-                this.y-TILE_SIZE+5,
+                -this.width / 2,
+                -this.height / 2,
                 this.width,
                 this.height
             );
+
+            ctx.restore();
         }
 
         ctx.save();
@@ -180,7 +203,7 @@ class Player {
                 this.height
             );
         }
-
         ctx.restore();
     }
+
 }

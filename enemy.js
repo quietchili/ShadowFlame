@@ -19,6 +19,7 @@ class Enemy {
         this.frame_timer = 0;
         this.frame_interval = 12;
         this.frame_index_y = 0;
+        this.health = 3;
     }
     update() {
         if (!this.alive) return;
@@ -103,23 +104,37 @@ class Enemy {
     draw() {
         if (!this.alive) return;
 
+
+        ctx.font = "6px Arial";
+        ctx.textAlign = "start";
+        ctx.fillStyle = "white";
+        ctx.fillText("Health: " + this.health, this.x, this.y);
+
         ctx.save();
         if (this.facing === 'left') {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, this.frame_index_y,
-                TILE_SIZE, TILE_SIZE,
-                -this.x - this.width, this.y,
-                this.width, this.height
+                this.frame_index * TILE_SIZE,
+                3*this.frame_index_y,
+                TILE_SIZE,
+                TILE_SIZE,
+                -this.x - this.width,
+                this.y,
+                this.width,
+                this.height
             );
         } else {
             ctx.drawImage(
                 tile_map,
-                this.frame_index * TILE_SIZE, this.frame_index_y,
-                TILE_SIZE, TILE_SIZE,
-                this.x, this.y,
-                this.width, this.height
+                this.frame_index * TILE_SIZE,
+                3*this.frame_index_y,
+                TILE_SIZE,
+                TILE_SIZE,
+                this.x,
+                this.y,
+                this.width,
+                this.height
             );
         }
         ctx.restore();

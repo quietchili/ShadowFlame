@@ -45,10 +45,14 @@ class Boss {
             // const fireSound = new Audio('fire.mp3');
             // fireSound.volume = 0.5;
             // fireSound.play();
-
-            let new_fireball = new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, fireball_speed_x, 0);
-            this.fireballs.push(new_fireball);
-            this.fire_cooldown = 100;
+            
+            this.fireballs.push(new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, 0, 1));
+            this.fireballs.push(new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, 1, 1));
+            this.fireballs.push(new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, 1, 0));
+            this.fireballs.push(new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, -1, 0));
+            this.fireballs.push(new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, -1, -1));
+            this.fireballs.push(new Fireball(this.x, this.y, TILE_SIZE, TILE_SIZE, 0, -1));
+            this.fire_cooldown = 300;
         }
 
         //movement
@@ -63,7 +67,7 @@ class Boss {
             this.facing = 'right';
             this.frame_index_y = TILE_SIZE;
         } else {
-            this.frame_index_y = 0;
+            this.frame_index_y = TILE_SIZE;
         }
 
         this.is_on_ground = false;
@@ -116,6 +120,7 @@ class Boss {
         this.y += this.dy;
         this.x += this.dx;
     }
+    
     draw() {
         if (!this.alive) return;
         this.fireballs.forEach(fireball => {
@@ -123,26 +128,36 @@ class Boss {
         });
 
         ctx.save();
+
+        ctx.font = "6px Arial";
+        ctx.textAlign = "start";
+        ctx.fillStyle = "white";
+        ctx.fillText("Health: " + this.health, this.x, this.y);
+
         if (this.facing === 'left') {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 tile_map,
                 this.frame_index * TILE_SIZE,
-                this.frame_index_y,
-                TILE_SIZE, TILE_SIZE,
+                3*this.frame_index_y,
+                TILE_SIZE,
+                TILE_SIZE,
                 -this.x - this.width,
                 this.y,
-                this.width, this.height
+                this.width,
+                this.height
             );
         } else {
             ctx.drawImage(
                 tile_map,
                 this.frame_index * TILE_SIZE,
-                this.frame_index_y,
+                3*this.frame_index_y,
                 TILE_SIZE,
                 TILE_SIZE,
-                this.x, this.y,
-                this.width, this.height
+                this.x,
+                this.y,
+                this.width,
+                this.height
             );
         }
         ctx.restore();
